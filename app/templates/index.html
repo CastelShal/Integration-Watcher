@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Webhooks Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>GitHub Webhooks Viewer</h1>
+        </header>
+
+        <!-- Error Section -->
+        <div id="error-section" class="error-section" style="display: none;">
+            <div class="error-message" id="error-message"></div>
+        </div>
+
+        <!-- Events List -->
+        <div class="events-list" id="events-list">
+            <div class="list-item no-events">
+                <p>No new events in the last 15 seconds</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastSeenId = null;
+
+        // Fetch events from the backend
+        async function fetchEvents() {
+            try {
+                // Clear error section
+                const errorSection = document.getElementById('error-section');
+                errorSection.style.display = 'none';
+
+                // Build the URL with query parameter if we have a lastSeenId
+                let url = "{{ url_for('events.get_events') }}";
+                if (lastSeenId) {
+                    url += `?mongoId=${lastSeenId}`;
+                }
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const events = await response.json();
+
+                // Handle the response
+                displayEvents(events);
+
+                // Update the lastSeenId if we received events
+                if (events.length > 0) {
+                    lastSeenId = events[events.length - 1]._id;
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                showError(`Failed to fetch events: ${error.message}`);
+            }
+        }
+
+        // Display events in the list
+        function displayEvents(events) {
+            const eventsList = document.getElementById('events-list');
+
+            if (events.length === 0) {
+                eventsList.innerHTML = `
+                    <div class="list-item no-events">
+                        <p>No new events in the last 15 seconds</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Clear the list
+            eventsList.innerHTML = '';
+
+            // Add each event as a list item
+            events.forEach(event => {
+                const listItem = createEventItem(event);
+                eventsList.appendChild(listItem);
+            });
+        }
+
+        // Create a list item element for an event
+        function createEventItem(event) {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+
+            // Format the timestamp
+            const timestamp = new Date(event.timestamp).toLocaleString();
+
+            // Create content HTML
+            let content = `
+                <div class="event-header">
+                    <span class="event-type">${escapeHtml(event.event_type || 'Unknown')}</span>
+                    <span class="event-time">${timestamp}</span>
+                </div>
+                <div class="event-body">
+                    <pre>${escapeHtml(JSON.stringify(event, null, 2))}</pre>
+                </div>
+            `;
+
+            div.innerHTML = content;
+            return div;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorSection = document.getElementById('error-section');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Poll events every 15 seconds
+        fetchEvents(); // Initial fetch
+        setInterval(fetchEvents, 15000);
+    </script>
+</body>
+</html>
