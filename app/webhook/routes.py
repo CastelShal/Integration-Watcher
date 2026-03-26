@@ -2,8 +2,8 @@ import hashlib
 import hmac
 import os
 from flask import Blueprint, abort, json, request
-from app.webhook.event_handlers import process_event
 from app.extensions import mongo
+from app.celery_workers.tasks import handle_event
 webhook = Blueprint('Webhook', __name__, url_prefix='/webhook')
 
 def validate_signature(payload, signature):
@@ -18,17 +18,11 @@ def index():
 
 @webhook.route('/receiver', methods=["POST"])
 def receiver():
-    signature = request.headers.get("X-Hub-Signature-256")
-    if not signature:
-        abort(401)
-    if not validate_signature(request.data, signature):
-        abort(403)
-
-    data = request.json
     event_type = request.headers.get('X-GitHub-Event')
-    processed = process_event(event_type, data)
-    if processed is None:
-        return {}, 400
-    mongo.db["webhooks"].insert_one(processed)
+    signature = request.headers.get("X-Hub-Signature-256")
+    if not signature or not event_type:
+        abort(401)
+    handle_event.delay(request.data, signature, event_type)
     return {}, 200
+
 

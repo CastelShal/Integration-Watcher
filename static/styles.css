@@ -123,7 +123,7 @@ body {
     background: #e9ecef;
     border-radius: 4px;
 }
-
+    
 .event-body::-webkit-scrollbar-thumb {
     background: #adb5bd;
     border-radius: 4px;

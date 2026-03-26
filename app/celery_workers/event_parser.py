@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 def process_event(event_type, event_data):
     if event_type == 'push':
         return process_push(event_data)

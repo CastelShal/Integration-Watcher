@@ -1,0 +1,16 @@
+FROM python:3.14
+
+WORKDIR /application
+
+RUN mkdir app
+RUN touch app/__init__.py
+COPY app/celery_workers ./app/celery_workers
+
+RUN pip install celery
+RUN pip install pymongo
+RUN pip install dotenv
+RUN pip install redis
+
+EXPOSE 5000
+
+CMD ["celery", "-A", "app.celery_workers.webhook_worker", "worker","--loglevel=info"]
