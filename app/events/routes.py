@@ -8,34 +8,23 @@ events = Blueprint('events', __name__, url_prefix='/event')
 @events.route('', methods=['GET'])
 def get_events():
     try:
+        query = {}
         # Get the mongoId query parameter
         last_id = request.args.get('mongoId', None)
         
-        # Build the query
-        query = {}
-        
-        # If mongoId is provided, add the greater than check
+        # If mongoId is provided, get only documents added after it
         if last_id:
-            try:
-                query['_id'] = {'$gt': ObjectId(last_id)}
-            except Exception:
-                return jsonify({'error': 'Invalid mongoId format'}), 400
+            query['_id'] = {'$gt': ObjectId(last_id)}
         
-        # Add timestamp filter for documents within the last 15 seconds
+        # Only fetch events within the last 15 seconds
         fifteen_seconds_ago = datetime.utcnow() - timedelta(seconds=15)
-        # query['timestamp'] = {'$gte': fifteen_seconds_ago}
-        
+        query['timestamp'] = {'$gte': fifteen_seconds_ago}
+
         # Query the database
-        documents = list(mongo.db["webhooks"].find(query))
-        
-        # Transform documents to exclude _id field for JSON response
-        events_list = []
-        for doc in documents:
-            doc_copy = dict(doc)
-            doc_copy['_id'] = str(doc_copy['_id'])  # Convert ObjectId to string for JSON serialization
-            events_list.append(doc_copy)
-        
-        return jsonify(events_list), 200
+        documents = mongo.db["webhooks"].find(query, {'_id': 0})
+        events_dict = list(map(dict, documents))
+
+        return jsonify(events_dict), 200
     
     except Exception as e:
         print(f"Error fetching events: {str(e)}")

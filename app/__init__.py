@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def create_app():
-    # Get the root directory (parent of app folder)
+    # Get the root directory 
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     template_dir = os.path.join(root_dir, 'app', 'templates')
     static_dir = os.path.join(root_dir, 'static')
