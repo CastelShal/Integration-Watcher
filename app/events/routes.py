@@ -21,7 +21,7 @@ def get_events():
         query['timestamp'] = {'$gte': fifteen_seconds_ago}
 
         # Query the database
-        documents = mongo.db["webhooks"].find(query, {'_id': 0})
+        documents = mongo.db["webhooks"].find(query)
         events_dict = list(map(dict, documents))
 
         return jsonify(events_dict), 200
