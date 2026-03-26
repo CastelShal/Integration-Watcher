@@ -1,0 +1,35 @@
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # network_mode: host
+    image: flask-webhook-app
+    env_file:
+      - .env.docker
+    ports:
+      - "3000:5000"
+  webhook-workers:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    image: celery-webhook-workers
+    environment:
+      - C_FORCE_ROOT='true'
+    env_file:
+      - .env.docker
+  mongodb-database:
+    # network_mode: host
+    image: mongodb/mongodb-community-server:8.0-ubi8
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=root
+      - MONGODB_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+        bind:
+            selinux: z
+  redis-broker:
+    # network_mode: host
+    image: redis:latest

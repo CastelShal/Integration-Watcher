@@ -3,5 +3,5 @@ __pycache__
 .env
 .env.docker
 venv
-docker-compose.yml
 data/
+logs/*

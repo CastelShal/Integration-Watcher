@@ -1,6 +1,14 @@
 from datetime import datetime
 
 def process_event(event_type, event_data):
+    """
+    This function processes GitHub events and extracts relevant event data based on the event type.
+    Args:
+        event_type (str): The type of the GitHub event (e.g., 'push', 'pull_request').
+        event_data (dict): The raw event data received from GitHub.
+    Returns:
+        dict: A dictionary containing the processed event data
+    """
     if event_type == 'push':
         return process_push(event_data)
 
@@ -13,6 +21,13 @@ def process_event(event_type, event_data):
         return None
 
 def process_push(event_data):
+    """
+    This function processes a push event and extracts relevant data such as request ID, author, branches, and timestamp.
+    Args:
+        event_data (dict): The raw event data for a push event received from GitHub.
+    Returns:
+        dict: A dictionary containing the processed event data for the push event.
+    """
     req_id = str(event_data['head_commit']["id"])
     pusher = event_data['pusher']['name']
     to_branch = event_data['ref'].split('/')[-1]
@@ -27,6 +42,13 @@ def process_push(event_data):
         }
 
 def process_pull_request(event_data):
+    """
+    This function processes a pull request event and extracts relevant data such as request ID, author, branches, and timestamp.
+    Args:
+        event_data (dict): The raw event data for a pull request event received from GitHub.
+    Returns:
+        dict: A dictionary containing the processed event data for the pull request event.
+    """
     req_id = str(event_data['pull_request']['id'])
     timestamp = datetime.fromisoformat(event_data['pull_request']['created_at'])
     author = event_data['pull_request']['user']['login']
@@ -42,6 +64,13 @@ def process_pull_request(event_data):
     }
 
 def process_merge(event_data):
+    """
+    This function processes a merge event and extracts relevant data such as request ID, author, branches, and timestamp.
+    Args:
+        event_data (dict): The raw event data for a merge event received from GitHub.
+    Returns:
+        dict: A dictionary containing the processed event data for the merge event.
+    """
     req_id = str(event_data['pull_request']['id'])
     timestamp = datetime.fromisoformat(event_data['pull_request']['merged_at'])
     author = event_data['pull_request']['user']['login']
