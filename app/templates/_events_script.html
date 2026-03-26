@@ -15,12 +15,12 @@
 
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Failed to fetch events, Error ${response.status}`);
             }
 
             const events = await response.json();
             displayEvents(events);
-            
+
             if (events.length > 0) {
                 lastSeenId = events[events.length - 1]._id;
             }
@@ -61,36 +61,44 @@
         const timestamp = new Intl.DateTimeFormat('en-US', options).format(date);
 
         // Format event description based on action type
+        let cname = ""
         let description = '';
-        const author = event.author || 'Unknown';
-
+        const author = event.author;
+        let svg_file = "";
+        
         switch (event.action) {
             case 'PUSH':
-                const pushBranch = event.to_branch || 'unknown';
+                const pushBranch = event.to_branch;
                 description = `${author} pushed to "${pushBranch}" on ${timestamp}`;
+                cname = "push-item"
                 break;
             case 'PULL_REQUEST':
-                const fromBranch = event.from_branch || 'unknown';
-                const toBranch = event.to_branch || 'unknown';
+                const fromBranch = event.from_branch;
+                const toBranch = event.to_branch;
                 description = `${author} submitted a pull request from "${fromBranch}" to "${toBranch}" on ${timestamp}`;
+                cname = 'pr-item'
                 break;
             case 'MERGE':
-                const mergeFromBranch = event.from_branch || 'unknown';
-                const mergeToBranch = event.to_branch || 'unknown';
+                const mergeFromBranch = event.from_branch;
+                const mergeToBranch = event.to_branch;
                 description = `${author} merged branch "${mergeFromBranch}" to "${mergeToBranch}" on ${timestamp}`;
+                cname = 'merge-item'
                 break;
             default:
                 description = `${author} performed ${event.action || 'unknown'} on ${timestamp}`;
         }
+        
+        div.classList.add(cname);
 
-        // Create content HTML - only description
-        let content = `
-            <div class="event-item">
-                <p>${description}</p>
-            </div>
-        `;
+        // Create content HTML
+        const content = document.createElement('div');
+        content.className = 'event-item';
 
-        div.innerHTML = content;
+        const p = document.createElement('p');
+        p.textContent = description;
+
+        content.appendChild(p);
+        div.appendChild(content);
         return div;
     }
 
