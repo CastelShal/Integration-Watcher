@@ -1,6 +1,11 @@
 import logging, logging.config
 import os
 
+LOGS_FOLDER = 'logs/'
+
+if not os.path.exists(LOGS_FOLDER):
+    os.makedirs(LOGS_FOLDER)
+
 # Centralized logging setup for event and webhook routes
 logging.config.dictConfig({
     'version': 1,
@@ -12,13 +17,13 @@ logging.config.dictConfig({
     'handlers': {
         'event_file': {
             'class': 'logging.FileHandler',
-            'filename': 'logs/events.log',
+            'filename': LOGS_FOLDER + 'events.log',
             'formatter': 'default',
             'level': logging.INFO,
         },
         'webhook_file': {
             'class': 'logging.FileHandler',
-            'filename': 'logs/webhooks.log',
+            'filename': LOGS_FOLDER + 'webhooks.log',
             'formatter': 'default',
             'level': logging.INFO,
         },

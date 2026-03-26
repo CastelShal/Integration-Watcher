@@ -1,7 +1,4 @@
 __pycache__
 .vscode
-.env
-.env.docker
-venv
-data/
+.env*
 logs/*
