@@ -1,47 +1,57 @@
-# Dev Assessment - Webhook Receiver
+# TStax Webhook Repository
 
-Please use this repository for constructing the Flask webhook receiver.
+A Flask application that receives and processes GitHub webhook events, storing them in MongoDB.
 
-*******************
+## Local Deployment Instructions
 
-## Setup
+### Prerequisites
 
-* Create a new virtual environment
+- Python 3.9+
+- MongoDB 8.0+
+- Git
 
-```bash
-pip install virtualenv
-```
-
-* Create the virtual env
+### Step 1: Clone and Setup
 
 ```bash
-virtualenv venv
+git clone git@github.com:CastelShal/TStax-Webhook-Repo.git
+cd TStax-Webhook-Repo
 ```
 
-* Activate the virtual env
+### Step 2: Create Virtual Environment
 
 ```bash
-source venv/bin/activate
+python3 -m venv webhook-repo
+source webhook-repo/bin/activate
 ```
 
-* Install requirements
+### Step 3: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-* Run the flask application (In production, please use Gunicorn)
+### Step 4: Configure Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# MongoDB Connection String
+# Format: mongodb://username:password@host:port/database
+MONGO_URI=your_mongo_uri
+
+# GitHub Webhook Secret
+# This is the secret key configured in your GitHub webhook settings
+GITHUB_SECRET=your_github_webhook_secret
+```
+### Step 5: Run the Application
+
+With your virtual environment activated:
 
 ```bash
 python run.py
 ```
 
-* The endpoint is at:
-
-```bash
-POST http://127.0.0.1:5000/webhook/receiver
-```
-
-You need to use this as the base and setup the flask app. Integrate this with MongoDB (commented at `app/extensions.py`)
-
-*******************
+The application will start and be accessible at:
+- **Application URL**: `http://localhost:5000`
+- **Webhook Receiver Endpoint**: `http://localhost:5000/webhook/receiver`
+- **Events Viewer**: `http://localhost:5000/event`
